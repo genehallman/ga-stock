@@ -1,0 +1,11 @@
+{
+  "name": "ga-stock",
+  "description": "A genetic algorithm stock profiler",
+  "author": "Gene Hallman <genehallman@gmail.com>",
+  "version": "1.0.0",
+  "dependencies": {
+    "moment": "~2.0.0",
+    "request": "~2.21.0",
+    "csv": "~0.3.3"
+  }
+}
