@@ -26,7 +26,6 @@ exports.evalFitness = function(algorithm, sourceData, trainingSet) {
   var totalDiff = 0;
   for (var i = 0; i < trainingSet.length; i++) {
     var res = algorithm.eval(sourceData, i);
-    console.log(res, trainingSet[i]);
     var diff = Math.abs(trainingSet[i] - res);
     totalDiff = totalDiff + diff;
   }
@@ -50,9 +49,23 @@ exports.crossover = function(male, female) {
   }
   childStr = childStr + male.substr(points[9]);
   if (childStr == male || childStr == female) {
-    console.log("DUPE");
+    //console.log("DUPE");
   }
   return new Algorithm(childStr);
+};
+
+exports.mutate = function(algo) {
+  var mutateRate = 0.02;
+  var bitStr = algo.toBitString();
+  var newBitStr = "";
+  for (var i = 0; i < bitStr.length; i++) {
+    if(Math.random() < mutateRate) {
+      newBitStr = newBitStr + (bitStr[i] == "0" ? "1" : "0");
+    } else {
+      newBitStr = newBitStr + bitStr[i];
+    }
+  }
+  return new Algorithm(newBitStr);
 };
 
 exports.newGeneration = function(coefAbs, compCount, algoCount) {
@@ -65,7 +78,8 @@ exports.newGeneration = function(coefAbs, compCount, algoCount) {
 };
 
 exports.mutateGeneration = function(gen, sourceData, trainingSet) {
-  var fitness = gen.algorithms.map(function(a) { return exports.evalFitness(a, sourceData, trainingSet); });
+  var fit_orig = gen.algorithms.map(function(a) { return exports.evalFitness(a, sourceData, trainingSet); });
+  var fitness = fit_orig;
   
   var max = fitness.reduce(function(f1, f2) { return f1 > f2 ? f1 : f2; });
   var min = fitness.reduce(function(f1, f2) { return f1 < f2 ? f1 : f2; });
@@ -75,9 +89,13 @@ exports.mutateGeneration = function(gen, sourceData, trainingSet) {
   var weights = fitness.map(function(f) { return f / total; });
 
   var newGen = new Generation();
+  var best = gen.getBest(sourceData, trainingSet)[0];
   for (var i = 0; i < gen.algorithms.length; i++) {
     if (i == 0) {
-      newGen.algorithms.push(gen.getBest(sourceData, trainingSet)[0]);
+      newGen.algorithms.push(best);
+      continue;
+    } else if (i < Math.floor(gen.algorithms.length / 4)) {
+      newGen.algorithms.push(exports.newAlgorithm(Number.MAX_VALUE, best.components.length));
       continue;
     }
     var offset1 = Math.random();
@@ -94,24 +112,18 @@ exports.mutateGeneration = function(gen, sourceData, trainingSet) {
     }
     var algoM = gen.algorithms[index1];
     var algoF = gen.algorithms[index2];
+    var child = exports.mutate(exports.crossover(algoM.toBitString(), algoF.toBitString()));
     
-    var child = exports.crossover(algoM.toBitString(), algoF.toBitString());
+    //console.log(fit_orig);
+    //console.log(weights);
+    //console.log(index1.toString(), algoM.toString(), algoM.toBitString());
+    //console.log(index2.toString(), algoF.toString(), algoM.toBitString());
+    //console.log("c", child.toString(), child.toBitString());
+    //console.log('***********');
+    
     newGen.algorithms.push(child);
   }
   
   return newGen;
 };
-
-
-
-
-
-
-
-
-
-
-
-
-
 

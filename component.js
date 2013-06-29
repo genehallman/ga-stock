@@ -10,9 +10,9 @@ var Component = function(coefficient, fn, arg_fn) {
       var tInt = parseInt(binStr.substr(i*8, 8), 2);
       buff.writeUInt8(tInt, i);
     }
-    this.coefficient = buff.readFloatBE(0);
-    this.fn = Object.keys(baseFns)[buff.readUInt8(4)];
-    this.arg_fn = Object.keys(argFns)[buff.readUInt8(5)];
+    this.coefficient = buff.readFloatBE(0) || 0;
+    this.fn = Object.keys(baseFns)[buff.readUInt8(4) % Object.keys(baseFns).length];
+    this.arg_fn = Object.keys(argFns)[buff.readUInt8(5) % Object.keys(argFns).length];
   } else {
     this.coefficient = coefficient || 0;
     this.fn = fn || "x";
